@@ -1,5 +1,4 @@
 /*----- PROTECTED REGION ID(Socket2Class.cpp) ENABLED START -----*/
-static const char *RcsId      = "$Id: Socket2Class.cpp,v 1.8 2018-05-09 16:06:06 alessio Exp $";
 static const char *TagName    = "Socket2 $Name:  $";
 static const char *CvsPath    = "$Source: /home/cvsadm/cvsroot/fermi/servers/socket2/src/Socket2Class.cpp,v $";
 static const char *SvnPath    = "$HeadURL:  $";

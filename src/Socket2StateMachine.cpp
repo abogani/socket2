@@ -1,5 +1,4 @@
 /*----- PROTECTED REGION ID(Socket2StateMachine.cpp) ENABLED START -----*/
-static const char *RcsId = "$Id: Socket2StateMachine.cpp,v 1.4 2017-12-21 15:34:33 alessio Exp $";
 //=============================================================================
 //
 // file :        Socket2StateMachine.cpp
