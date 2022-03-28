@@ -531,7 +531,7 @@ void Socket2::write(const Tango::DevVarCharArray *argin)
 				continue;
 			}
 
-			if( errno == ECONNREFUSED )
+			if( errno == ECONNREFUSED || errno == EHOSTUNREACH)
 			{
 				delete argin_data;
 
