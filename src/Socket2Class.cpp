@@ -72,17 +72,20 @@ namespace Socket2_ns
 //===================================================================
 Socket2Class *Socket2Class::_instance = NULL;
 
+//===================================================================
+//	Class constants
+//===================================================================
 //--------------------------------------------------------
 /**
- * method : 		Socket2Class::Socket2Class(string &s)
+ * method : 		Socket2Class::Socket2Class(std::string &s)
  * description : 	constructor for the Socket2Class
  *
  * @param s	The class name
  */
 //--------------------------------------------------------
-Socket2Class::Socket2Class(string &s):Tango::DeviceClass(s)
+Socket2Class::Socket2Class(std::string &s):Tango::DeviceClass(s)
 {
-	cout2 << "Entering Socket2Class constructor" << endl;
+	TANGO_LOG_INFO << "Entering Socket2Class constructor" << std::endl;
 	set_default_property();
 	write_class_property();
 
@@ -90,7 +93,7 @@ Socket2Class::Socket2Class(string &s):Tango::DeviceClass(s)
 	
 	/*----- PROTECTED REGION END -----*/	//	Socket2Class::constructor
 
-	cout2 << "Leaving Socket2Class constructor" << endl;
+	TANGO_LOG_INFO << "Leaving Socket2Class constructor" << std::endl;
 }
 
 //--------------------------------------------------------
@@ -124,10 +127,10 @@ Socket2Class *Socket2Class::init(const char *name)
 	{
 		try
 		{
-			string s(name);
+			std::string s(name);
 			_instance = new Socket2Class(s);
 		}
-		catch (bad_alloc &)
+		catch (std::bad_alloc &)
 		{
 			throw;
 		}
@@ -146,7 +149,7 @@ Socket2Class *Socket2Class::instance()
 {
 	if (_instance == NULL)
 	{
-		cerr << "Class is not initialised !!" << endl;
+		std::cerr << "Class is not initialized !!" << std::endl;
 		exit(-1);
 	}
 	return _instance;
@@ -170,7 +173,7 @@ Socket2Class *Socket2Class::instance()
 //--------------------------------------------------------
 CORBA::Any *WriteClass::execute(Tango::DeviceImpl *device, const CORBA::Any &in_any)
 {
-	cout2 << "WriteClass::execute(): arrived" << endl;
+	TANGO_LOG_INFO << "WriteClass::execute(): arrived" << std::endl;
 	const Tango::DevVarCharArray *argin;
 	extract(in_any, argin);
 	((static_cast<Socket2 *>(device))->write(argin));
@@ -190,7 +193,7 @@ CORBA::Any *WriteClass::execute(Tango::DeviceImpl *device, const CORBA::Any &in_
 //--------------------------------------------------------
 CORBA::Any *ReadClass::execute(Tango::DeviceImpl *device, const CORBA::Any &in_any)
 {
-	cout2 << "ReadClass::execute(): arrived" << endl;
+	TANGO_LOG_INFO << "ReadClass::execute(): arrived" << std::endl;
 	Tango::DevLong argin;
 	extract(in_any, argin);
 	return insert((static_cast<Socket2 *>(device))->read(argin));
@@ -209,7 +212,7 @@ CORBA::Any *ReadClass::execute(Tango::DeviceImpl *device, const CORBA::Any &in_a
 //--------------------------------------------------------
 CORBA::Any *ReadUntilClass::execute(Tango::DeviceImpl *device, const CORBA::Any &in_any)
 {
-	cout2 << "ReadUntilClass::execute(): arrived" << endl;
+	TANGO_LOG_INFO << "ReadUntilClass::execute(): arrived" << std::endl;
 	const Tango::DevVarCharArray *argin;
 	extract(in_any, argin);
 	return insert((static_cast<Socket2 *>(device))->read_until(argin));
@@ -221,11 +224,11 @@ CORBA::Any *ReadUntilClass::execute(Tango::DeviceImpl *device, const CORBA::Any 
 //===================================================================
 //--------------------------------------------------------
 /**
- *	Method      : Socket2Class::get_class_property()
- *	Description : Get the class property for specified name.
+ *	Method     : Socket2Class::get_class_property()
+ *	Description: Get the class property for specified name.
  */
 //--------------------------------------------------------
-Tango::DbDatum Socket2Class::get_class_property(string &prop_name)
+Tango::DbDatum Socket2Class::get_class_property(std::string &prop_name)
 {
 	for (unsigned int i=0 ; i<cl_prop.size() ; i++)
 		if (cl_prop[i].name == prop_name)
@@ -236,11 +239,11 @@ Tango::DbDatum Socket2Class::get_class_property(string &prop_name)
 
 //--------------------------------------------------------
 /**
- *	Method      : Socket2Class::get_default_device_property()
- *	Description : Return the default value for device property.
+ *	Method     : Socket2Class::get_default_device_property()
+ *	Description: Return the default value for device property.
  */
 //--------------------------------------------------------
-Tango::DbDatum Socket2Class::get_default_device_property(string &prop_name)
+Tango::DbDatum Socket2Class::get_default_device_property(std::string &prop_name)
 {
 	for (unsigned int i=0 ; i<dev_def_prop.size() ; i++)
 		if (dev_def_prop[i].name == prop_name)
@@ -251,11 +254,11 @@ Tango::DbDatum Socket2Class::get_default_device_property(string &prop_name)
 
 //--------------------------------------------------------
 /**
- *	Method      : Socket2Class::get_default_class_property()
- *	Description : Return the default value for class property.
+ *	Method     : Socket2Class::get_default_class_property()
+ *	Description: Return the default value for class property.
  */
 //--------------------------------------------------------
-Tango::DbDatum Socket2Class::get_default_class_property(string &prop_name)
+Tango::DbDatum Socket2Class::get_default_class_property(std::string &prop_name)
 {
 	for (unsigned int i=0 ; i<cl_def_prop.size() ; i++)
 		if (cl_def_prop[i].name == prop_name)
@@ -267,8 +270,8 @@ Tango::DbDatum Socket2Class::get_default_class_property(string &prop_name)
 
 //--------------------------------------------------------
 /**
- *	Method      : Socket2Class::set_default_property()
- *	Description : Set default property (class and device) for wizard.
+ *	Method     : Socket2Class::set_default_property()
+ *	Description: Set default property (class and device) for wizard.
  *                For each property, add to wizard property name and description.
  *                If default value has been set, add it to wizard property and
  *                store it in a DbDatum.
@@ -276,10 +279,10 @@ Tango::DbDatum Socket2Class::get_default_class_property(string &prop_name)
 //--------------------------------------------------------
 void Socket2Class::set_default_property()
 {
-	string	prop_name;
-	string	prop_desc;
-	string	prop_def;
-	vector<string>	vect_data;
+	std::string	prop_name;
+	std::string	prop_desc;
+	std::string	prop_def;
+	std::vector<std::string>	vect_data;
 
 	//	Set Default Class Properties
 
@@ -354,8 +357,8 @@ void Socket2Class::set_default_property()
 
 //--------------------------------------------------------
 /**
- *	Method      : Socket2Class::write_class_property()
- *	Description : Set class description fields as property in database
+ *	Method     : Socket2Class::write_class_property()
+ *	Description: Set class description fields as property in database
  */
 //--------------------------------------------------------
 void Socket2Class::write_class_property()
@@ -365,124 +368,25 @@ void Socket2Class::write_class_property()
 		return;
 
 	Tango::DbData	data;
-	string	classname = get_name();
-	string	header;
-	string::size_type	start, end;
+	std::string	classname = get_name();
+	std::string	header;
 
 	//	Put title
 	Tango::DbDatum	title("ProjectTitle");
-	string	str_title("");
+	std::string	str_title("");
 	title << str_title;
 	data.push_back(title);
 
 	//	Put Description
 	Tango::DbDatum	description("Description");
-	vector<string>	str_desc;
+	std::vector<std::string>	str_desc;
 	str_desc.push_back("");
 	description << str_desc;
 	data.push_back(description);
 
-	//	put cvs or svn location
-	string	filename("Socket2");
-	filename += "Class.cpp";
-
-	// check for cvs information
-	string	src_path(CvsPath);
-	start = src_path.find("/");
-	if (start!=string::npos)
-	{
-		end   = src_path.find(filename);
-		if (end>start)
-		{
-			string	strloc = src_path.substr(start, end-start);
-			//	Check if specific repository
-			start = strloc.find("/cvsroot/");
-			if (start!=string::npos && start>0)
-			{
-				string	repository = strloc.substr(0, start);
-				if (repository.find("/segfs/")!=string::npos)
-					strloc = "ESRF:" + strloc.substr(start, strloc.length()-start);
-			}
-			Tango::DbDatum	cvs_loc("cvs_location");
-			cvs_loc << strloc;
-			data.push_back(cvs_loc);
-		}
-	}
-
-	// check for svn information
-	else
-	{
-		string	src_path(SvnPath);
-		start = src_path.find("://");
-		if (start!=string::npos)
-		{
-			end = src_path.find(filename);
-			if (end>start)
-			{
-				header = "$HeadURL: ";
-				start = header.length();
-				string	strloc = src_path.substr(start, (end-start));
-				
-				Tango::DbDatum	svn_loc("svn_location");
-				svn_loc << strloc;
-				data.push_back(svn_loc);
-			}
-		}
-	}
-
-	//	Get CVS or SVN revision tag
-	
-	// CVS tag
-	string	tagname(TagName);
-	header = "$Name: ";
-	start = header.length();
-	string	endstr(" $");
-	
-	end   = tagname.find(endstr);
-	if (end!=string::npos && end>start)
-	{
-		string	strtag = tagname.substr(start, end-start);
-		Tango::DbDatum	cvs_tag("cvs_tag");
-		cvs_tag << strtag;
-		data.push_back(cvs_tag);
-	}
-	
-	// SVN tag
-	string	svnpath(SvnPath);
-	header = "$HeadURL: ";
-	start = header.length();
-	
-	end   = svnpath.find(endstr);
-	if (end!=string::npos && end>start)
-	{
-		string	strloc = svnpath.substr(start, end-start);
-		
-		string tagstr ("/tags/");
-		start = strloc.find(tagstr);
-		if ( start!=string::npos )
-		{
-			start = start + tagstr.length();
-			end   = strloc.find(filename);
-			string	strtag = strloc.substr(start, end-start-1);
-			
-			Tango::DbDatum	svn_tag("svn_tag");
-			svn_tag << strtag;
-			data.push_back(svn_tag);
-		}
-	}
-
-	//	Get URL location
-	string	httpServ(HttpServer);
-	if (httpServ.length()>0)
-	{
-		Tango::DbDatum	db_doc_url("doc_url");
-		db_doc_url << httpServ;
-		data.push_back(db_doc_url);
-	}
-
 	//  Put inheritance
 	Tango::DbDatum	inher_datum("InheritedFrom");
-	vector<string> inheritance;
+	std::vector<std::string> inheritance;
 	inheritance.push_back("TANGO_BASE_CLASS");
 	inher_datum << inheritance;
 	data.push_back(inher_datum);
@@ -497,8 +401,8 @@ void Socket2Class::write_class_property()
 
 //--------------------------------------------------------
 /**
- *	Method      : Socket2Class::device_factory()
- *	Description : Create the device object(s)
+ *	Method     : Socket2Class::device_factory()
+ *	Description: Create the device object(s)
  *                and store them in the device list
  */
 //--------------------------------------------------------
@@ -513,7 +417,7 @@ void Socket2Class::device_factory(const Tango::DevVarStringArray *devlist_ptr)
 	//	Create devices and add it into the device list
 	for (unsigned long i=0 ; i<devlist_ptr->length() ; i++)
 	{
-		cout4 << "Device name : " << (*devlist_ptr)[i].in() << endl;
+		TANGO_LOG_DEBUG << "Device name : " << (*devlist_ptr)[i].in() << std::endl;
 		device_list.push_back(new Socket2(this, (*devlist_ptr)[i]));
 	}
 
@@ -542,12 +446,12 @@ void Socket2Class::device_factory(const Tango::DevVarStringArray *devlist_ptr)
 }
 //--------------------------------------------------------
 /**
- *	Method      : Socket2Class::attribute_factory()
- *	Description : Create the attribute object(s)
+ *	Method     : Socket2Class::attribute_factory()
+ *	Description: Create the attribute object(s)
  *                and store them in the attribute list
  */
 //--------------------------------------------------------
-void Socket2Class::attribute_factory(vector<Tango::Attr *> &att_list)
+void Socket2Class::attribute_factory(std::vector<Tango::Attr *> &att_list)
 {
 	/*----- PROTECTED REGION ID(Socket2Class::attribute_factory_before) ENABLED START -----*/
 	
@@ -571,7 +475,6 @@ void Socket2Class::attribute_factory(vector<Tango::Attr *> &att_list)
 	//	min_warning	not set for InputLength
 	//	delta_t	not set for InputLength
 	//	delta_val	not set for InputLength
-	
 	inputlength->set_default_properties(inputlength_prop);
 	//	Not Polled
 	inputlength->set_disp_level(Tango::OPERATOR);
@@ -595,7 +498,6 @@ void Socket2Class::attribute_factory(vector<Tango::Attr *> &att_list)
 	//	min_warning	not set for OutputLength
 	//	delta_t	not set for OutputLength
 	//	delta_val	not set for OutputLength
-	
 	outputlength->set_default_properties(outputlength_prop);
 	//	Not Polled
 	outputlength->set_disp_level(Tango::OPERATOR);
@@ -619,7 +521,6 @@ void Socket2Class::attribute_factory(vector<Tango::Attr *> &att_list)
 	//	min_warning	not set for Reconnections
 	//	delta_t	not set for Reconnections
 	//	delta_val	not set for Reconnections
-	
 	reconnections->set_default_properties(reconnections_prop);
 	//	Not Polled
 	reconnections->set_disp_level(Tango::OPERATOR);
@@ -637,8 +538,8 @@ void Socket2Class::attribute_factory(vector<Tango::Attr *> &att_list)
 }
 //--------------------------------------------------------
 /**
- *	Method      : Socket2Class::pipe_factory()
- *	Description : Create the pipe object(s)
+ *	Method     : Socket2Class::pipe_factory()
+ *	Description: Create the pipe object(s)
  *                and store them in the pipe list
  */
 //--------------------------------------------------------
@@ -657,8 +558,8 @@ void Socket2Class::pipe_factory()
 }
 //--------------------------------------------------------
 /**
- *	Method      : Socket2Class::command_factory()
- *	Description : Create the command object(s)
+ *	Method     : Socket2Class::command_factory()
+ *	Description: Create the command object(s)
  *                and store them in the command list
  */
 //--------------------------------------------------------
@@ -712,19 +613,19 @@ void Socket2Class::command_factory()
  * method : 		Socket2Class::create_static_attribute_list
  * description : 	Create the a list of static attributes
  *
- * @param	att_list	the ceated attribute list
+ * @param	att_list	the created attribute list
  */
 //--------------------------------------------------------
-void Socket2Class::create_static_attribute_list(vector<Tango::Attr *> &att_list)
+void Socket2Class::create_static_attribute_list(std::vector<Tango::Attr *> &att_list)
 {
 	for (unsigned long i=0 ; i<att_list.size() ; i++)
 	{
-		string att_name(att_list[i]->get_name());
+		std::string att_name(att_list[i]->get_name());
 		transform(att_name.begin(), att_name.end(), att_name.begin(), ::tolower);
 		defaultAttList.push_back(att_name);
 	}
 
-	cout2 << defaultAttList.size() << " attributes in default list" << endl;
+	TANGO_LOG_INFO << defaultAttList.size() << " attributes in default list" << std::endl;
 
 	/*----- PROTECTED REGION ID(Socket2Class::create_static_att_list) ENABLED START -----*/
 	
@@ -741,26 +642,26 @@ void Socket2Class::create_static_attribute_list(vector<Tango::Attr *> &att_list)
  * @param	list of all attributes
  */
 //--------------------------------------------------------
-void Socket2Class::erase_dynamic_attributes(const Tango::DevVarStringArray *devlist_ptr, vector<Tango::Attr *> &att_list)
+void Socket2Class::erase_dynamic_attributes(const Tango::DevVarStringArray *devlist_ptr, std::vector<Tango::Attr *> &att_list)
 {
 	Tango::Util *tg = Tango::Util::instance();
 
 	for (unsigned long i=0 ; i<devlist_ptr->length() ; i++)
 	{
-		Tango::DeviceImpl *dev_impl = tg->get_device_by_name(((string)(*devlist_ptr)[i]).c_str());
+		Tango::DeviceImpl *dev_impl = tg->get_device_by_name(((std::string)(*devlist_ptr)[i]).c_str());
 		Socket2 *dev = static_cast<Socket2 *> (dev_impl);
 
-		vector<Tango::Attribute *> &dev_att_list = dev->get_device_attr()->get_attribute_list();
-		vector<Tango::Attribute *>::iterator ite_att;
+		std::vector<Tango::Attribute *> &dev_att_list = dev->get_device_attr()->get_attribute_list();
+		std::vector<Tango::Attribute *>::iterator ite_att;
 		for (ite_att=dev_att_list.begin() ; ite_att != dev_att_list.end() ; ++ite_att)
 		{
-			string att_name((*ite_att)->get_name_lower());
+			std::string att_name((*ite_att)->get_name_lower());
 			if ((att_name == "state") || (att_name == "status"))
 				continue;
-			vector<string>::iterator ite_str = find(defaultAttList.begin(), defaultAttList.end(), att_name);
+			std::vector<std::string>::iterator ite_str = find(defaultAttList.begin(), defaultAttList.end(), att_name);
 			if (ite_str == defaultAttList.end())
 			{
-				cout2 << att_name << " is a UNWANTED dynamic attribute for device " << (*devlist_ptr)[i] << endl;
+				TANGO_LOG_INFO << att_name << " is a UNWANTED dynamic attribute for device " << (*devlist_ptr)[i] << std::endl;
 				Tango::Attribute &att = dev->get_device_attr()->get_attr_by_name(att_name.c_str());
 				dev->remove_attribute(att_list[att.get_attr_idx()], true, false);
 				--ite_att;
@@ -774,13 +675,13 @@ void Socket2Class::erase_dynamic_attributes(const Tango::DevVarStringArray *devl
 
 //--------------------------------------------------------
 /**
- *	Method      : Socket2Class::get_attr_by_name()
- *	Description : returns Tango::Attr * object found by name
+ *	Method     : Socket2Class::get_attr_object_by_name()
+ *	Description: returns Tango::Attr * object found by name
  */
 //--------------------------------------------------------
-Tango::Attr *Socket2Class::get_attr_object_by_name(vector<Tango::Attr *> &att_list, string attname)
+Tango::Attr *Socket2Class::get_attr_object_by_name(std::vector<Tango::Attr *> &att_list, std::string attname)
 {
-	vector<Tango::Attr *>::iterator it;
+	std::vector<Tango::Attr *>::iterator it;
 	for (it=att_list.begin() ; it<att_list.end() ; ++it)
 		if ((*it)->get_name()==attname)
 			return (*it);
