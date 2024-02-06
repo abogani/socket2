@@ -1,5 +1,4 @@
 /*----- PROTECTED REGION ID(Socket2::main.cpp) ENABLED START -----*/
-static const char *RcsId = "$Id: main.cpp,v 1.5 2018-01-08 10:32:23 alessio Exp $";
 //=============================================================================
 //
 // file :        main.cpp
