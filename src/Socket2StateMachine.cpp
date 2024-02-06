@@ -114,8 +114,7 @@ bool Socket2::is_Reconnections_allowed(TANGO_UNUSED(Tango::AttReqType type))
 bool Socket2::is_Write_allowed(TANGO_UNUSED(const CORBA::Any &any))
 {
 	//	Compare device state with not allowed states.
-	if (get_state()==Tango::FAULT ||
-		get_state()==Tango::INIT)
+	if (get_state()==Tango::INIT)
 	{
 	/*----- PROTECTED REGION ID(Socket2::WriteStateAllowed) ENABLED START -----*/
 	
@@ -134,8 +133,7 @@ bool Socket2::is_Write_allowed(TANGO_UNUSED(const CORBA::Any &any))
 bool Socket2::is_Read_allowed(TANGO_UNUSED(const CORBA::Any &any))
 {
 	//	Compare device state with not allowed states.
-	if (get_state()==Tango::FAULT ||
-		get_state()==Tango::INIT)
+	if (get_state()==Tango::INIT)
 	{
 	/*----- PROTECTED REGION ID(Socket2::ReadStateAllowed) ENABLED START -----*/
 	
@@ -154,8 +152,7 @@ bool Socket2::is_Read_allowed(TANGO_UNUSED(const CORBA::Any &any))
 bool Socket2::is_ReadUntil_allowed(TANGO_UNUSED(const CORBA::Any &any))
 {
 	//	Compare device state with not allowed states.
-	if (get_state()==Tango::FAULT ||
-		get_state()==Tango::INIT)
+	if (get_state()==Tango::INIT)
 	{
 	/*----- PROTECTED REGION ID(Socket2::ReadUntilStateAllowed) ENABLED START -----*/
 	

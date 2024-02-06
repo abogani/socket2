@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ASCII"?>
 <pogoDsl:PogoSystem xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pogoDsl="http://www.esrf.fr/tango/pogo/PogoDsl">
   <classes name="Socket2" pogoRevision="9.7">
-    <description description="" title="" sourcePath="/home/alessio.bogani/Sources/git-trees/linkstabilizer/deps/socket2/src" language="Cpp" filestogenerate="XMI   file,Code files,Protected Regions" license="GPL" hasMandatoryProperty="true" hasConcreteProperty="true" hasAbstractCommand="false" hasAbstractAttribute="false">
+    <description description="" title="" sourcePath="/home/alessio/Sources/git-trees/socket2/src" language="Cpp" filestogenerate="XMI   file,Code files,Protected Regions" license="GPL" hasMandatoryProperty="true" hasConcreteProperty="true" hasAbstractCommand="false" hasAbstractAttribute="false">
       <inheritances classname="Device_Impl" sourcePath=""/>
       <identification contact="at elettra.eu> - Alessio Igor Bogani &lt;alessio.bogani" author="Alessio Igor Bogani &lt;alessio.bogani" emailDomain="elettra.eu>" classFamily="Communication" siteSpecific="" platform="Unix Like" bus="Socket" manufacturer="none" reference=""/>
     </description>
@@ -34,7 +34,6 @@
         <type xsi:type="pogoDsl:VoidType"/>
       </argout>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
-      <excludedStates>FAULT</excludedStates>
       <excludedStates>INIT</excludedStates>
     </commands>
     <commands name="Read" description="" execMethod="read" displayLevel="OPERATOR" polledPeriod="0">
@@ -45,7 +44,6 @@
         <type xsi:type="pogoDsl:CharArrayType"/>
       </argout>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
-      <excludedStates>FAULT</excludedStates>
       <excludedStates>INIT</excludedStates>
     </commands>
     <commands name="ReadUntil" description="" execMethod="read_until" displayLevel="OPERATOR" polledPeriod="0">
@@ -56,7 +54,6 @@
         <type xsi:type="pogoDsl:CharArrayType"/>
       </argout>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
-      <excludedStates>FAULT</excludedStates>
       <excludedStates>INIT</excludedStates>
     </commands>
     <attributes name="InputLength" attType="Scalar" rwType="READ" displayLevel="OPERATOR" polledPeriod="0" maxX="" maxY="" allocReadMember="true" isDynamic="false">
