@@ -97,6 +97,8 @@ class Socket2 : public TANGO_BASE_CLASS
 
 	enum { SLEEP, SELECT } multiplexing;
 
+	timeval tout;
+
 /*----- PROTECTED REGION END -----*/	//	Socket2::Data Members
 
 //	Device property data members
