@@ -41,8 +41,6 @@
 #include <tango.h>
 #include <netdb.h>
 
-#define BUFFER_SIZE 1000
-
 /*----- PROTECTED REGION END -----*/	//	Socket2.h
 
 #ifdef TANGO_LOG
@@ -77,28 +75,22 @@ class Socket2 : public TANGO_BASE_CLASS
 //	Add your own data members
 	string init_error;
 
+	enum {TCP, UDP} proto;
+
+	int fd;
+	int conn_state;
 	sockaddr_in sa;
 	socklen_t sa_len;
-	
-	enum { TCP, UDP } proto;
-	
-	int fd;
-	fd_set readfds;
-	fd_set writefds;
-	fd_set errorfds;
-	
-	enum event_type { READ, WRITE };
 
-	unsigned char buffer[ BUFFER_SIZE ];
-	vector< unsigned char > data;
+	enum event_type {READ, WRITE};
 
-	bool connecting;
-	long long reconnections;
+	vector<unsigned char> data;
 
-	enum { SLEEP, SELECT } multiplexing;
+	int reconnections;
 
-	timeval tout;
+	enum {SLEEP, SELECT} multiplexing;
 
+	timeval timeout_timeval, tout;
 /*----- PROTECTED REGION END -----*/	//	Socket2::Data Members
 
 //	Device property data members
@@ -106,7 +98,7 @@ public:
 	//	Hostname:	
 	std::string	hostname;
 	//	Port:	
-	Tango::DevUShort	port;
+	Tango::DevLong	port;
 	//	Protocol:	
 	std::string	protocol;
 	//	Timeout:	
@@ -267,22 +259,17 @@ public:
 /*----- PROTECTED REGION ID(Socket2::Additional Method prototypes) ENABLED START -----*/
 
 //	Additional Method prototypes
-	void check_init();
-
-	void resolve();
-
+	bool sleep(timeval);
 	void open();
-	void close();
-	void check_connection( );
-	bool wait_for( event_type et, timeval *tv );
-	bool wait_for_with_sleep( event_type et, timeval *tv );
-	bool wait_for_with_select( event_type et, timeval *tv );
-
 	int input_queue_length();
 	int output_queue_length();
-
-	bool read( struct timeval *tv );
-
+	void close();
+  void resolve();
+	ssize_t _write(int, const void*, size_t);
+	ssize_t _read(int, void*, size_t);
+	void check_state(bool);
+	bool wait_for(event_type);
+	size_t common_read(size_t);
 /*----- PROTECTED REGION END -----*/	//	Socket2::Additional Method prototypes
 };
 
