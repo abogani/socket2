@@ -772,7 +772,7 @@ void Socket2::resolve()
 
 	if (::inet_pton(AF_INET, hostname.c_str(), &(sa.sin_addr)) > 0) {
 		sa.sin_family = AF_INET;
-		sa.sin_port = ::htons(port);
+		sa.sin_port = htons(port);
 	} else if (::getaddrinfo(hostname.c_str(), NULL, &hints, &res) == 0) {
 		for (p=res; p!=NULL; p=p->ai_next) {
 			if (p->ai_family == AF_INET) {
@@ -781,7 +781,7 @@ void Socket2::resolve()
 								ipstr, sizeof ipstr);
 				sa.sin_addr = ((sockaddr_in *)p->ai_addr)->sin_addr;
 				sa.sin_family = ((sockaddr_in *)p->ai_addr)->sin_family;
-				sa.sin_port = ::htons(port);
+				sa.sin_port = htons(port);
 			}
 		}
 		::freeaddrinfo(res);
@@ -910,6 +910,7 @@ bool Socket2::wait_for(event_type et)
 		return true;
 	} else {}
 	assert(false);
+	return false;
 }
 
 size_t Socket2::common_read(size_t bytes_to_read)
