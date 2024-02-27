@@ -264,12 +264,12 @@ public:
 	int input_queue_length();
 	int output_queue_length();
 	void close();
-  void resolve();
 	ssize_t _write(int, const void*, size_t);
 	ssize_t _read(int, void*, size_t);
 	void check_state(bool);
 	bool wait_for(event_type);
-	size_t common_read(size_t);
+	void common_read(size_t);
+	void resolve();
 /*----- PROTECTED REGION END -----*/	//	Socket2::Additional Method prototypes
 };
 
