@@ -175,7 +175,7 @@ void Socket2::init_device()
 		return;
 
 	/*----- PROTECTED REGION ID(Socket2::init_device) ENABLED START -----*/
-	
+
 	// Disabling SIGPIPE signal
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
 		init_error = "Fail to ignore SIGPIPE signal";
@@ -573,7 +573,7 @@ Tango::DevVarCharArray *Socket2::read(Tango::DevLong argin)
 				"", "Out of limit", __PRETTY_FUNCTION__);
 	}
 
-	common_read(argin);
+	read(argin);
 
 	argout = new Tango::DevVarCharArray();
 	vector<unsigned char> transfer(data.begin(), data.begin() + argin);
@@ -618,7 +618,7 @@ Tango::DevVarCharArray *Socket2::read_until(const Tango::DevVarCharArray *argin)
 				break;
 			}
 		}
-		common_read(dsize + 1);
+		read(dsize + 1);
 	} while (true);
 
 	argout = new Tango::DevVarCharArray();
@@ -654,11 +654,11 @@ bool Socket2::sleep(timeval tv)
 
 	if (timercmp(&tout, &tv, <)) {
 		::sleep(tout.tv_sec);
-		::usleep(tout.tv_usec);
+		usleep(tout.tv_usec);
 		timerclear(&tout);
 	} else { // tout >= tv
 		::sleep(tv.tv_sec);
-		::usleep(tv.tv_usec);
+		usleep(tv.tv_usec);
 		timersub(&tout, &tv, &tout);
 		assert(tout.tv_sec >= 0 && tout.tv_usec >= 0);
 	}
@@ -669,7 +669,7 @@ void Socket2::open()
 {
 	DEBUG_STREAM << "Opening the file descriptor..." << endl;
 
-	if ((fd = ::socket(PF_INET, proto == UDP? SOCK_DGRAM:SOCK_STREAM, 0)) == -1) {
+	if ((fd = socket(PF_INET, proto == UDP? SOCK_DGRAM:SOCK_STREAM, 0)) == -1) {
 		ERROR_STREAM << "Socket creation failed: " 
 			<< string(strerror(errno)) << endl;
 		return;
@@ -677,7 +677,7 @@ void Socket2::open()
 
 	if (proto == TCP) {
 		int flag = 1;
-		if (::setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, 
+		if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, 
 					sizeof(flag)) == -1) {
 			::close(fd);
 			ERROR_STREAM << "Disabling Nagle failed: " 
@@ -686,7 +686,7 @@ void Socket2::open()
 		}
 
 		flag = 1;
-		if (::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*)&flag, 
+		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*)&flag, 
 					sizeof(flag)) == -1)	{
 			::close(fd);
 			ERROR_STREAM << "Enabling reuseaddr flag failed: " 
@@ -696,20 +696,20 @@ void Socket2::open()
 	}
 
 	int flags = fcntl(fd, F_GETFL, 0);
-	if (::fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+	if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
 		::close(fd);
 		ERROR_STREAM << "Enabling O_NONBLOCK failed: " 
 			<< string(strerror(errno)) << endl;
 		return;
 	}
 
-	::connect(fd, (sockaddr*)&sa, sizeof(sockaddr));
+	connect(fd, (sockaddr*)&sa, sizeof(sockaddr));
 }
 
 int Socket2::input_queue_length()
 {
 	int len;
-	if (::ioctl(fd, TIOCINQ, &len) == -1)
+	if (ioctl(fd, TIOCINQ, &len) == -1)
 		return -1;
 	return len;
 }
@@ -717,7 +717,7 @@ int Socket2::input_queue_length()
 int Socket2::output_queue_length()
 {
 	int len;
-	if (::ioctl(fd, TIOCOUTQ, &len) == -1)
+	if (ioctl(fd, TIOCOUTQ, &len) == -1)
 		return -1;
 	return len;
 }
@@ -871,7 +871,7 @@ bool Socket2::wait_for(event_type et)
 	return false;
 }
 
-void Socket2::common_read(size_t bytes_to_read)
+void Socket2::read(size_t bytes_to_read)
 {
 	unsigned char buffer[10000];
 	size_t bytes_total = data.size();
@@ -910,21 +910,21 @@ void Socket2::resolve()
 	char ipstr[INET6_ADDRSTRLEN];
 
 	sa_len = sizeof(sa);
-	::memset(&sa, 0, sa_len);
+	memset(&sa, 0, sa_len);
 
 	addrinfo hints;
-	::memset(&hints, 0, sizeof(hints));
+	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	addrinfo *res, *p;
 
-	if (::inet_pton(AF_INET, hostname.c_str(), &(sa.sin_addr)) > 0) {
+	if (inet_pton(AF_INET, hostname.c_str(), &(sa.sin_addr)) > 0) {
 		sa.sin_family = AF_INET;
 		sa.sin_port = htons(port);
-	} else if (::getaddrinfo(hostname.c_str(), NULL, &hints, &res) == 0) {
+	} else if (getaddrinfo(hostname.c_str(), NULL, &hints, &res) == 0) {
 		for (p=res; p!=NULL; p=p->ai_next) {
 			if (p->ai_family == AF_INET) {
-				::inet_ntop(p->ai_family,
+				inet_ntop(p->ai_family,
 						&(((sockaddr_in *)p->ai_addr)->sin_addr),
 						ipstr, sizeof ipstr);
 				sa.sin_addr = ((sockaddr_in *)p->ai_addr)->sin_addr;
@@ -932,7 +932,7 @@ void Socket2::resolve()
 				sa.sin_port = htons(port);
 			}
 		}
-		::freeaddrinfo(res);
+		freeaddrinfo(res);
 	}	else {
 		ERROR_STREAM << "Name resolution failed" << endl;
 	}
