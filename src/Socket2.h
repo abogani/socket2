@@ -265,10 +265,9 @@ public:
 	int output_queue_length();
 	void close();
 	ssize_t _write(int, const void*, size_t);
-	ssize_t _read(int, void*, size_t);
+	void _read(size_t);
 	void check_state(bool);
 	bool wait_for(event_type);
-	void read(size_t);
 	void resolve();
 /*----- PROTECTED REGION END -----*/	//	Socket2::Additional Method prototypes
 };

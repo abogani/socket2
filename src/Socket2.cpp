@@ -573,7 +573,7 @@ Tango::DevVarCharArray *Socket2::read(Tango::DevLong argin)
 				"", "Out of limit", __PRETTY_FUNCTION__);
 	}
 
-	read(argin);
+	_read(argin);
 
 	argout = new Tango::DevVarCharArray();
 	vector<unsigned char> transfer(data.begin(), data.begin() + argin);
@@ -618,7 +618,7 @@ Tango::DevVarCharArray *Socket2::read_until(const Tango::DevVarCharArray *argin)
 				break;
 			}
 		}
-		read(dsize + 1);
+		_read(dsize + 1);
 	} while (true);
 
 	argout = new Tango::DevVarCharArray();
@@ -753,12 +753,38 @@ ssize_t Socket2::_write(int fd, const void *buf, size_t count)
 	return ret;
 }
 
-ssize_t Socket2::_read(int fd, void *buf, size_t count)
+void Socket2::_read(size_t bytes_to_read)
 {
-	int ret = proto == UDP? 
-		::recvfrom(fd, buf, count, 0, (sockaddr*) &sa, &sa_len):
-		::read(fd, buf, count);
-	return ret;
+  unsigned char buffer[10000];
+  size_t bytes_total = data.size();
+
+  while (bytes_total < bytes_to_read) {
+    if (! wait_for(READ))
+      goto timeout;
+
+    size_t count = min((size_t)max(input_queue_length(), 0), sizeof(buffer));
+    ssize_t bytes_readed = proto == UDP?
+      ::recvfrom(fd, buffer, count, 0, (sockaddr*) &sa, &sa_len):
+      ::read(fd, buffer, count);
+
+    if (bytes_readed > 0) {
+      data.insert(data.end(), &buffer[0], &buffer[bytes_readed]);
+      bytes_total += bytes_readed;
+    } else if (bytes_readed == 0) {
+      if (multiplexing == SELECT)
+        goto error;
+      /* Continue if multiplexing == SLEEP */
+    }	else { /* bytes_readed < 0 */
+      check_state(true);
+      goto error;
+    }
+  }
+  return;
+error:
+  sleep(tout);
+timeout:
+  Tango::Except::throw_exception(
+    "", "Timeout expired", __PRETTY_FUNCTION__);
 }
 
 void Socket2::check_state(bool forcing)
@@ -869,39 +895,6 @@ bool Socket2::wait_for(event_type et)
 	}
 	assert(false);
 	return false;
-}
-
-void Socket2::read(size_t bytes_to_read)
-{
-	unsigned char buffer[10000];
-	size_t bytes_total = data.size();
-
-	while (bytes_total < bytes_to_read) {
-		if (! wait_for(READ))
-			goto timeout;
-
-		ssize_t bytes_readed = _read(fd, buffer,
-				min((size_t)max(input_queue_length(), 0),
-					sizeof(buffer)));
-
-		if (bytes_readed > 0) {
-			data.insert(data.end(), &buffer[0], &buffer[bytes_readed]);
-			bytes_total += bytes_readed;
-		} else if (bytes_readed == 0) {
-			if (multiplexing == SELECT)
-				goto error;
-			/* Continue if multiplexing == SLEEP */
-		}	else { /* bytes_readed < 0 */
-			check_state(true);
-			goto error;
-		}
-	}
-	return;
-error:
-	sleep(tout);
-timeout:
-	Tango::Except::throw_exception(
-			"", "Timeout expired", __PRETTY_FUNCTION__);
 }
 
 void Socket2::resolve()
