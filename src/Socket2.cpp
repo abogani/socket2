@@ -610,14 +610,18 @@ Tango::DevVarCharArray *Socket2::read_until(const Tango::DevVarCharArray *argin)
 
 	char delim = (*argin)[0];
 	size_t pos = 0, dsize;
+	bool found = false;
 
 	do {
 		dsize = data.size();
 		for (; pos < dsize; ++pos) {
 			if (memcmp(&data[pos], &delim, 1) == 0)	{
+				found = true;
 				break;
 			}
 		}
+		if (found)
+			break;
 		_read(dsize + 1);
 	} while (true);
 
