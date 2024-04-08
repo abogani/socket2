@@ -75,12 +75,8 @@ class Socket2 : public TANGO_BASE_CLASS
 //	Add your own data members
 	string init_error;
 
-	enum {TCP, UDP} proto;
-
 	int fd;
 	int conn_state;
-	sockaddr_in sa;
-	socklen_t sa_len;
 
 	enum event_type {READ, WRITE};
 
@@ -91,6 +87,11 @@ class Socket2 : public TANGO_BASE_CLASS
 	enum {SLEEP, SELECT} multiplexing;
 
 	timeval timeout_timeval, tout;
+
+	enum {TCP, UDP} proto;
+
+	sockaddr_in sa;
+	socklen_t sa_len;
 /*----- PROTECTED REGION END -----*/	//	Socket2::Data Members
 
 //	Device property data members

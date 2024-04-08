@@ -292,18 +292,18 @@ void Socket2::get_device_property()
 	/*----- PROTECTED REGION ID(Socket2::get_device_property_after) ENABLED START -----*/
 	
 	//	Check device property data members init
+	transform(iOMultiplexing.begin(), iOMultiplexing.end(), iOMultiplexing.begin(), ::tolower);
+	if (iOMultiplexing == "sleep") {
+		multiplexing = SLEEP;
+	} else {
+		multiplexing = SELECT;
+	}
+
 	transform(protocol.begin(), protocol.end(), protocol.begin(), ::tolower);
 	if (protocol == "udp") {
 		proto = UDP;
 	} else {
 		proto = TCP;
-	}
-
-	transform(iOMultiplexing.begin(), iOMultiplexing.end(), iOMultiplexing.begin(), ::tolower);
-	if (iOMultiplexing == "sleep") {
-		multiplexing = SLEEP;
-	}	else {
-		multiplexing = SELECT;
 	}
 
 	if (port <= 0 || port > 65535)
@@ -522,7 +522,6 @@ void Socket2::write(const Tango::DevVarCharArray *argin)
 				goto error;
 			/* Continue if multiplexing == SLEEP */
 		} else { /* bytes_written < 0 */
-			check_state(false);
 			goto error;
 		}
 	}
@@ -541,6 +540,7 @@ void Socket2::write(const Tango::DevVarCharArray *argin)
 	return;
 
 error:
+	check_state(false);
 	sleep(tout);
 timeout:
 	Tango::Except::throw_exception(
@@ -735,7 +735,7 @@ void Socket2::close()
 
 	if(input_len + output_len)
 	{
-		WARN_STREAM << " Bytes dropped: " << input_len << " input, "
+		WARN_STREAM << " Bytes dropped: " << input_len << " (" << data.size() << ") input, "
 			<< output_len << " output" << endl;
 	}
 
@@ -779,12 +779,12 @@ void Socket2::_read(size_t bytes_to_read)
         goto error;
       /* Continue if multiplexing == SLEEP */
     }	else { /* bytes_readed < 0 */
-      check_state(true);
       goto error;
     }
   }
   return;
 error:
+  check_state(false);
   sleep(tout);
 timeout:
   Tango::Except::throw_exception(
@@ -843,6 +843,7 @@ void Socket2::check_state(bool forcing)
 
 	set_state(Tango::INIT);
 	set_status("Reconnecting due: " + mesg);
+	DEBUG_STREAM << "Reconnecting due: " << mesg << endl;
 
 	close();
 	resolve();
