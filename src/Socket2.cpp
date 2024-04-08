@@ -508,8 +508,12 @@ void Socket2::write(const Tango::DevVarCharArray *argin)
 	int olength;
 
 	while (bytes_total < bytes_to_write) {
-		if (! wait_for(WRITE))
+		int s = select(WRITE);
+		if (s == 0)
 			goto timeout;
+    else if (s < 0)
+        goto error;
+    else { /* s > 0 */ }
 
 		ssize_t bytes_written = _write(
 				fd, argin_data.data() + bytes_total,
@@ -763,8 +767,12 @@ void Socket2::_read(size_t bytes_to_read)
   size_t bytes_total = data.size();
 
   while (bytes_total < bytes_to_read) {
-    if (! wait_for(READ))
-      goto timeout;
+		int s = select(READ);
+		if (s == 0)
+			goto timeout;
+    else if (s < 0)
+        goto error;
+    else { /* s > 0 */ }
 
     size_t count = min((size_t)max(input_queue_length(), 0), sizeof(buffer));
     ssize_t bytes_readed = proto == UDP?
@@ -784,7 +792,7 @@ void Socket2::_read(size_t bytes_to_read)
   }
   return;
 error:
-  check_state(false);
+  check_state(true);
   sleep(tout);
 timeout:
   Tango::Except::throw_exception(
@@ -851,7 +859,7 @@ void Socket2::check_state(bool forcing)
 	reconnections += 1;
 }
 
-bool Socket2::wait_for(event_type et)
+int Socket2::select(event_type et)
 {
 	if (multiplexing == SLEEP) {
 		timeval twait;
@@ -868,8 +876,8 @@ bool Socket2::wait_for(event_type et)
 	FD_ZERO(&errorfds);
 	FD_ZERO(&readfds);
 	FD_ZERO(&writefds);
-	FD_SET(fd, &errorfds);
 
+  FD_SET(fd, &errorfds);
 	switch (et) {
 		case WRITE:
 			FD_SET(fd, &writefds);
@@ -879,27 +887,28 @@ bool Socket2::wait_for(event_type et)
 			break;
 	}
 
-	int select_ret = select(fd + 1,	&readfds,
+	int select_ret = ::select(fd + 1,	&readfds,
 			&writefds, &errorfds, &tout);
 
+  if (FD_ISSET(fd, &errorfds)) {
+    assert(false);
+    return -1;
+  }
+
 	if (select_ret > 0) {
-		if (FD_ISSET(fd, &errorfds))
-			return false;
 		if (et == READ && FD_ISSET(fd, &readfds))
-			return true;
+			return select_ret;
 		if (et == WRITE && FD_ISSET(fd, &writefds))
-			return true;
+			return select_ret;
 		assert(false);
-		return false;
+		return -1;
 	} else if (select_ret == 0) {
-		return false;
+		return select_ret;
 	} else { // select_ret < 0
-		ERROR_STREAM << "Select() error " << select_ret
-			<< " not handled:" << strerror(errno) << endl;
-		return false;
+		return select_ret;
 	}
 	assert(false);
-	return false;
+	return -1;
 }
 
 void Socket2::resolve()

@@ -268,7 +268,7 @@ public:
 	ssize_t _write(int, const void*, size_t);
 	void _read(size_t);
 	void check_state(bool);
-	bool wait_for(event_type);
+	int select(event_type);
 	void resolve();
 /*----- PROTECTED REGION END -----*/	//	Socket2::Additional Method prototypes
 };
