@@ -510,9 +510,9 @@ void Socket2::write(const Tango::DevVarCharArray *argin)
 		int s = select(WRITE);
 		if (s == 0)
 			goto timeout;
-    else if (s < 0)
-        goto error;
-    else { /* s > 0 */ }
+		else if (s < 0)
+			goto error;
+		else { /* s > 0 */ }
 
 		ssize_t bytes_written = _write(
 				fd, argin_data.data() + bytes_total,
@@ -760,40 +760,40 @@ ssize_t Socket2::_write(int fd, const void *buf, size_t count)
 
 void Socket2::_read(size_t bytes_to_read)
 {
-  unsigned char buffer[10000];
-  size_t bytes_total = data.size();
+	unsigned char buffer[10000];
+	size_t bytes_total = data.size();
 
-  while (bytes_total < bytes_to_read) {
+	while (bytes_total < bytes_to_read) {
 		int s = select(READ);
 		if (s == 0)
 			goto timeout;
-    else if (s < 0)
-        goto error;
-    else { /* s > 0 */ }
+		else if (s < 0)
+			goto error;
+		else { /* s > 0 */ }
 
-    size_t count = min((size_t)max(input_queue_length(), 0), sizeof(buffer));
-    ssize_t bytes_readed = proto == UDP?
-      ::recvfrom(fd, buffer, count, 0, (sockaddr*) &sa, &sa_len):
-      ::read(fd, buffer, count);
+		size_t count = min((size_t)max(input_queue_length(), 0), sizeof(buffer));
+		ssize_t bytes_readed = proto == UDP?
+			::recvfrom(fd, buffer, count, 0, (sockaddr*) &sa, &sa_len):
+			::read(fd, buffer, count);
 
-    if (bytes_readed > 0) {
-      data.insert(data.end(), &buffer[0], &buffer[bytes_readed]);
-      bytes_total += bytes_readed;
-    } else if (bytes_readed == 0) {
-      if (multiplexing == SELECT)
-        goto error;
-      /* Continue if multiplexing == SLEEP */
-    }	else { /* bytes_readed < 0 */
-      goto error;
-    }
-  }
-  return;
+		if (bytes_readed > 0) {
+			data.insert(data.end(), &buffer[0], &buffer[bytes_readed]);
+			bytes_total += bytes_readed;
+		} else if (bytes_readed == 0) {
+			if (multiplexing == SELECT)
+				goto error;
+			/* Continue if multiplexing == SLEEP */
+		}	else { /* bytes_readed < 0 */
+			goto error;
+		}
+	}
+	return;
 error:
-  check_state(true);
-  sleep(tout);
+	check_state(true);
+	sleep(tout);
 timeout:
-  Tango::Except::throw_exception(
-    "", "Timeout expired", __PRETTY_FUNCTION__);
+	Tango::Except::throw_exception(
+			"", "Timeout expired", __PRETTY_FUNCTION__);
 }
 
 void Socket2::check_state(bool forcing)
@@ -874,7 +874,7 @@ int Socket2::select(event_type et)
 	FD_ZERO(&readfds);
 	FD_ZERO(&writefds);
 
-  FD_SET(fd, &errorfds);
+	FD_SET(fd, &errorfds);
 	switch (et) {
 		case WRITE:
 			FD_SET(fd, &writefds);
@@ -887,10 +887,10 @@ int Socket2::select(event_type et)
 	int select_ret = ::select(fd + 1,	&readfds,
 			&writefds, &errorfds, &tout);
 
-  if (FD_ISSET(fd, &errorfds)) {
-    assert(false);
-    return -1;
-  }
+	if (FD_ISSET(fd, &errorfds)) {
+		assert(false);
+		return -1;
+	}
 
 	if (select_ret > 0) {
 		if (et == READ && FD_ISSET(fd, &readfds))
