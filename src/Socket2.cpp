@@ -496,15 +496,23 @@ void Socket2::write(const Tango::DevVarCharArray *argin)
 {
 	DEBUG_STREAM << "Socket2::Write()  - " << device_name << std::endl;
 	/*----- PROTECTED REGION ID(Socket2::write) ENABLED START -----*/
+	vector<unsigned char> argin_data;
+	argin_data << *argin;
+	size_t bytes_total = 0, bytes_to_write = argin_data.size();
+
 	if (! init_error.empty()) {
 		sleep(tout);
 		Tango::Except::throw_exception(
 				"", init_error.c_str(), __PRETTY_FUNCTION__);
 	}
 
-	vector<unsigned char> argin_data;
-	argin_data << *argin;
-	size_t bytes_total = 0, bytes_to_write = argin_data.size();
+	if (max(output_queue_length(), 0) != 0) {
+		close();
+		resolve();
+		open();
+		reconnections += 1;
+		goto error;
+	}
 
 	while (bytes_total < bytes_to_write) {
 		int s = select(WRITE);
