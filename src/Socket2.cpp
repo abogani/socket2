@@ -682,7 +682,7 @@ void Socket2::open()
 
 	if (proto == TCP) {
 		int flag = 1;
-		if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, 
+		if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &flag, 
 					sizeof(flag)) == -1) {
 			::close(fd);
 			ERROR_STREAM << "Disabling Nagle failed: " 
@@ -691,7 +691,7 @@ void Socket2::open()
 		}
 
 		flag = 1;
-		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*)&flag, 
+		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &flag, 
 					sizeof(flag)) == -1)	{
 			::close(fd);
 			ERROR_STREAM << "Enabling reuseaddr flag failed: " 
