@@ -770,6 +770,7 @@ void Socket2::_read(size_t bytes_to_read)
 {
 	unsigned char buffer[10000];
 	size_t bytes_total = data.size();
+	ssize_t bytes_readed;
 
 	while (bytes_total < bytes_to_read) {
 		int s = select(READ);
@@ -780,7 +781,7 @@ void Socket2::_read(size_t bytes_to_read)
 		else { /* s > 0 */ }
 
 		size_t count = min((size_t)max(input_queue_length(), 0), sizeof(buffer));
-		ssize_t bytes_readed = proto == UDP?
+		bytes_readed = proto == UDP?
 			::recvfrom(fd, buffer, count, 0, (sockaddr*) &sa, &sa_len):
 			::read(fd, buffer, count);
 
