@@ -314,7 +314,7 @@ void Socket2::get_device_property()
 
 	DEBUG_STREAM << "Connecting to " << hostname << " on port " << port 
 		<< " using " << protocol << " protocol"  << " and " << iOMultiplexing 
-		<< " IO multiplexing type"  << " with a timeout of " << timeout << " ms "<< endl;
+		<< " IO multiplexing type"  << " with a timeout of " << timeout << " ms "<< std::endl;
 
 	timeout_timeval.tv_sec = timeout / 1000;
 	timeout_timeval.tv_usec = timeout % 1000 * 1000;
@@ -341,7 +341,7 @@ void Socket2::check_mandatory_property(Tango::DbDatum &class_prop, Tango::DbDatu
 		append_status(tms.str());
 		mandatoryNotDefined = true;
 		/*----- PROTECTED REGION ID(Socket2::check_mandatory_property) ENABLED START -----*/
-		cerr << tms.str() << " for " << device_name << endl;
+		std::cerr << tms.str() << " for " << device_name << std::endl;
 		
 		/*----- PROTECTED REGION END -----*/	//	Socket2::check_mandatory_property
 	}
@@ -372,7 +372,7 @@ void Socket2::always_executed_hook()
 	if (! init_error.empty()) {
 		set_state(Tango::FAULT);
 		set_status(init_error);
-		DEBUG_STREAM << init_error << endl;
+		DEBUG_STREAM << init_error << std::endl;
 	} else {
 		check_state(true);
 	}
@@ -496,7 +496,7 @@ void Socket2::write(const Tango::DevVarCharArray *argin)
 {
 	DEBUG_STREAM << "Socket2::Write()  - " << device_name << std::endl;
 	/*----- PROTECTED REGION ID(Socket2::write) ENABLED START -----*/
-	vector<unsigned char> argin_data;
+	std::vector<unsigned char> argin_data;
 	argin_data << *argin;
 	size_t bytes_total = 0, bytes_to_write = argin_data.size();
 
@@ -506,7 +506,7 @@ void Socket2::write(const Tango::DevVarCharArray *argin)
 				"", init_error.c_str(), __PRETTY_FUNCTION__);
 	}
 
-	if (max(output_queue_length(), 0) != 0) {
+	if (std::max(output_queue_length(), 0) != 0) {
 		close();
 		resolve();
 		open();
@@ -540,7 +540,7 @@ void Socket2::write(const Tango::DevVarCharArray *argin)
 	timeval twait;
 	timerclear(&twait);
 	twait.tv_usec = 1000;
-	while (max(output_queue_length(), 0) != 0) {
+	while (std::max(output_queue_length(), 0) != 0) {
 		if (! sleep(twait))
 			goto timeout;
 		timeradd(&twait, &twait, &twait);
@@ -585,7 +585,7 @@ Tango::DevVarCharArray *Socket2::read(Tango::DevLong argin)
 	_read(argin);
 
 	argout = new Tango::DevVarCharArray();
-	vector<unsigned char> transfer(data.begin(), data.begin() + argin);
+	std::vector<unsigned char> transfer(data.begin(), data.begin() + argin);
 	data.erase(data.begin(), data.begin() + argin);
 	*argout << transfer;
 	/*----- PROTECTED REGION END -----*/	//	Socket2::read
@@ -635,7 +635,7 @@ Tango::DevVarCharArray *Socket2::read_until(const Tango::DevVarCharArray *argin)
 	} while (true);
 
 	argout = new Tango::DevVarCharArray();
-	vector<unsigned char> transfer(data.begin(), data.begin() + pos +1);
+	std::vector<unsigned char> transfer(data.begin(), data.begin() + pos +1);
 	data.erase(data.begin(), data.begin() + pos + 1);
 	*argout << transfer;
 	/*----- PROTECTED REGION END -----*/	//	Socket2::read_until
@@ -680,11 +680,11 @@ bool Socket2::sleep(timeval tv)
 
 void Socket2::open()
 {
-	DEBUG_STREAM << "Opening the file descriptor..." << endl;
+	DEBUG_STREAM << "Opening the file descriptor..." << std::endl;
 
 	if ((fd = socket(PF_INET, proto == UDP? SOCK_DGRAM:SOCK_STREAM, 0)) == -1) {
 		ERROR_STREAM << "Socket creation failed: " 
-			<< string(strerror(errno)) << endl;
+			<< std::string(strerror(errno)) << std::endl;
 		return;
 	}
 
@@ -694,7 +694,7 @@ void Socket2::open()
 					sizeof(flag)) == -1) {
 			::close(fd);
 			ERROR_STREAM << "Disabling Nagle failed: " 
-				<< string(strerror(errno)) << endl;
+				<< std::string(strerror(errno)) << std::endl;
 			return;
 		}
 
@@ -703,7 +703,7 @@ void Socket2::open()
 					sizeof(flag)) == -1)	{
 			::close(fd);
 			ERROR_STREAM << "Enabling reuseaddr flag failed: " 
-				<< string(strerror(errno)) << endl;
+				<< std::string(strerror(errno)) << std::endl;
 			return;
 		}
 	}
@@ -712,7 +712,7 @@ void Socket2::open()
 	if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
 		::close(fd);
 		ERROR_STREAM << "Enabling O_NONBLOCK failed: " 
-			<< string(strerror(errno)) << endl;
+			<< std::string(strerror(errno)) << std::endl;
 		return;
 	}
 
@@ -737,21 +737,21 @@ int Socket2::output_queue_length()
 
 void Socket2::close()
 {
-	DEBUG_STREAM << "Closing the file descriptor..." << endl;
+	DEBUG_STREAM << "Closing the file descriptor..." << std::endl;
 
-	int output_len = max(output_queue_length(), 0);
-	int input_len = max(input_queue_length(), 0) + data.size();
+	int output_len = std::max(output_queue_length(), 0);
+	int input_len = std::max(input_queue_length(), 0) + data.size();
 
 	if(input_len + output_len)
 	{
 		WARN_STREAM << " Bytes dropped: " << input_len << " (" << data.size() << ") input, "
-			<< output_len << " output" << endl;
+			<< output_len << " output" << std::endl;
 	}
 
 	if (::close(fd) == -1)
 	{
 		ERROR_STREAM << "Error closing file descriptor: "
-			<< strerror(errno) << endl;
+			<< strerror(errno) << std::endl;
 	}
 	data.clear();
 }
@@ -780,7 +780,7 @@ void Socket2::_read(size_t bytes_to_read)
 			goto error;
 		else { /* s > 0 */ }
 
-		size_t count = min((size_t)max(input_queue_length(), 0), sizeof(buffer));
+		size_t count = std::min((size_t)std::max(input_queue_length(), 0), sizeof(buffer));
 		bytes_readed = proto == UDP?
 			::recvfrom(fd, buffer, count, 0, (sockaddr*) &sa, &sa_len):
 			::read(fd, buffer, count);
@@ -807,7 +807,7 @@ timeout:
 
 void Socket2::check_state(bool forcing)
 {
-	string mesg;
+	std::string mesg;
 
 	if (forcing)
 		(void)_write(fd, NULL, 0);
@@ -850,14 +850,14 @@ void Socket2::check_state(bool forcing)
 		case ENOTDIR:
 		default:
 			ERROR_STREAM << "Socket error " << conn_state
-				<< " not handled!" << endl;
+				<< " not handled!" << std::endl;
 			assert(false);
 			break;
 	}
 
 	set_state(Tango::INIT);
 	set_status("Reconnecting due: " + mesg);
-	DEBUG_STREAM << "Reconnecting due: " << mesg << endl;
+	DEBUG_STREAM << "Reconnecting due: " << mesg << std::endl;
 
 	close();
 	resolve();
@@ -919,7 +919,7 @@ int Socket2::select(event_type et)
 
 void Socket2::resolve()
 {
-	DEBUG_STREAM << "Resolving " << hostname << "... " << endl;
+	DEBUG_STREAM << "Resolving " << hostname << "... " << std::endl;
 	char ipstr[INET6_ADDRSTRLEN];
 
 	sa_len = sizeof(sa);
@@ -947,7 +947,7 @@ void Socket2::resolve()
 		}
 		freeaddrinfo(res);
 	}	else {
-		ERROR_STREAM << "Name resolution failed" << endl;
+		ERROR_STREAM << "Name resolution failed" << std::endl;
 	}
 }
 
